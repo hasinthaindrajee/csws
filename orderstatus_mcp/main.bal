@@ -1,6 +1,8 @@
 import ballerina/mcp;
+import ballerina/http;
 
-listener mcp:Listener mcpListener = new (8081);
+listener http:Listener httpListener = http:getDefaultListener();
+listener mcp:Listener mcpListener = new (httpListener);
 
 @mcp:ServiceConfig {
     info: {
