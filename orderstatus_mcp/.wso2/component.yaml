@@ -1,0 +1,11 @@
+schemaVersion: 1.1
+
+endpoints:
+  - name: order_status_mcp_server
+    displayName: Order Status MCP Server
+    service:
+      basePath: /
+      port: 9090
+      type: REST
+    networkVisibilities:
+      - Public
