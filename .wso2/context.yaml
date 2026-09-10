@@ -1,3 +1,5 @@
 - org: demoexonn
   project: csws
   local: true
+- org: cswstrial
+  project: default

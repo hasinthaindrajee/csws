@@ -1,5 +1,5 @@
-import ballerinax/hubspot.crm.obj.contacts;
 import ballerina/log;
+import ballerinax/hubspot.crm.obj.contacts;
 
 public function main() returns error? {
     log:printInfo("Checking for HubSpot contacts updated in the last minute...");

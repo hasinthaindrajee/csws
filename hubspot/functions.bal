@@ -42,12 +42,13 @@ function mapToContactProperties(contacts:SimplePublicObject hubspotContact) retu
     };
 }
 
-// Upserts a contact into the local Contacts table (insert or replace on duplicate contact_id)
+// Inserts a contact or updates the email if the contact_id already exists
 function upsertContact(ContactProperties contactProps) returns error? {
     string contactId = contactProps.contactId;
     string emailValue = contactProps.email ?: "";
-    sql:ParameterizedQuery upsertQuery = `REPLACE INTO Contacts (contact_id, email)
-        VALUES (${contactId}, ${emailValue})`;
+    sql:ParameterizedQuery upsertQuery = `INSERT INTO Contacts (contact_id, email)
+        VALUES (${contactId}, ${emailValue})
+        ON DUPLICATE KEY UPDATE email = ${emailValue}`;
     _ = check dbClient->execute(upsertQuery);
 }
 
