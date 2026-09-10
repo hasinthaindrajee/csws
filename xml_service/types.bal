@@ -1,43 +1,29 @@
-// Incoming request payload
-type InventoryRequest record {|
-    string sku;
+// Response for a single string value (e.g. country name, capital, phone code)
+type StringValueResponse record {|
+    string value;
 |};
 
-// Distribution center info
-type DistributionCenter record {|
-    string name;
-    string code;
+// A code+name pair used in list responses
+type CodeNamePair record {|
+    string sISOCode;
+    string sName;
 |};
 
-// Stock levels
-type Stock record {|
-    int quantityOnHand;
-    string unit;
-    int reorderPoint;
-    int reorderQuantity;
+// Currency info returned by CountryCurrency
+type CurrencyInfo record {|
+    string sISOCode;
+    string sName;
 |};
 
-// Warehouse location
-type Location record {|
-    string aisle;
-    string bay;
-    string shelf;
-|};
-
-// Supplier info
-type Supplier record {|
-    string name;
-    string supplierId;
-    int leadTimeDays;
-|};
-
-// Full inventory record for hardcoded data
-type InventoryItem record {|
-    string sku;
-    string description;
-    string lastUpdated;
-    DistributionCenter distributionCenter;
-    Stock stock;
-    Location location;
-    Supplier supplier;
+// Full country info returned by FullCountryInfo
+type FullCountryInfo record {|
+    string sISOCode;
+    string sName;
+    string sCapitalCity;
+    string sPhoneCode;
+    string sContinentCode;
+    string sCurrencyISOCode;
+    string sCountryFlag;
+    string sLanguageISOCode;
+    string sLanguageName;
 |};

@@ -58,18 +58,6 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
-name = "data.xmldata"
-version = "1.6.2"
-dependencies = [
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "lang.object"}
-]
-modules = [
-	{org = "ballerina", packageName = "data.xmldata", moduleName = "data.xmldata"}
-]
-
-[[package]]
-org = "ballerina"
 name = "file"
 version = "1.12.0"
 dependencies = [
@@ -188,6 +176,9 @@ name = "lang.regexp"
 version = "0.0.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
+]
+modules = [
+	{org = "ballerina", packageName = "lang.regexp", moduleName = "lang.regexp"}
 ]
 
 [[package]]
@@ -309,8 +300,8 @@ org = "demoexonn"
 name = "xml_service"
 version = "0.1.0"
 dependencies = [
-	{org = "ballerina", name = "data.xmldata"},
-	{org = "ballerina", name = "http"}
+	{org = "ballerina", name = "http"},
+	{org = "ballerina", name = "lang.regexp"}
 ]
 modules = [
 	{org = "demoexonn", packageName = "xml_service", moduleName = "xml_service"}
