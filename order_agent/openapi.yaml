@@ -1,0 +1,63 @@
+openapi: 3.0.3
+info:
+  title: Order Status Agent
+  description: >-
+    Answers natural-language order status questions. The agent calls the order
+    status MCP service as a tool and replies in plain English.
+  version: 0.1.0
+
+# Paths are relative to the basePath declared in .wso2/component.yaml (/orderAgent).
+paths:
+  /chat:
+    post:
+      summary: Ask an order status question
+      description: >-
+        Send a natural-language question. Reuse the same sessionId across calls
+        to keep conversation context, so follow-up questions like "when will it
+        arrive?" resolve against the order discussed earlier.
+      operationId: chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatReqMessage'
+      responses:
+        '200':
+          description: The agent's answer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatRespMessage'
+        '400':
+          description: Malformed request payload
+        '500':
+          description: The agent could not complete the request
+
+components:
+  schemas:
+    ChatReqMessage:
+      type: object
+      required:
+        - sessionId
+        - message
+      properties:
+        sessionId:
+          type: string
+          description: >-
+            Identifies the conversation. The same value groups messages into one
+            session; a new value starts a fresh conversation.
+          example: session-001
+        message:
+          type: string
+          description: The user's question in natural language.
+          example: What is the status of ORD-10002?
+    ChatRespMessage:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: The agent's answer in natural language.
+          example: Order ORD-10002 has shipped via UPS and is due to arrive on 2026-09-11.
