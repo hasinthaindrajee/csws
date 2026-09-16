@@ -22,3 +22,6 @@ endpoints:
     # Accepted values: Project|Organization|Public(Default).
     networkVisibilities:
       - Public
+    # +optional The file path to the API definition, relative to the component root.
+    # Without this, the endpoint is exposed as a wildcard route on all HTTP verbs.
+    schemaFilePath: openapi.yaml

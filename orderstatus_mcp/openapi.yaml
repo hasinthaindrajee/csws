@@ -1,0 +1,145 @@
+openapi: 3.0.3
+info:
+  title: Customer Operations MCP Server
+  description: >-
+    Exposes order status as MCP (Model Context Protocol) tools over the
+    Streamable HTTP transport. Consumers are AI agents rather than humans, so
+    the protocol is JSON-RPC 2.0 over a single endpoint: the operation is named
+    in the request body, not in the URL.
+
+    Tools: getOrderDetails (full order information by order ID) and listOrders
+    (all available order IDs).
+  version: 0.1.0
+
+# Paths are relative to the basePath declared in .wso2/component.yaml (/).
+# The Ballerina service is declared as `service mcp:Service /mcp`, so the single
+# MCP endpoint is /mcp. All three methods are part of the Streamable HTTP
+# transport and must stay routable.
+paths:
+  /mcp:
+    post:
+      summary: Send a JSON-RPC message to the MCP server
+      description: >-
+        Carries every MCP operation — initialize, tools/list, tools/call. The
+        method field in the body selects the operation. The response is
+        application/json for a single reply, or text/event-stream when the
+        server streams.
+      operationId: mcpPost
+      parameters:
+        - $ref: '#/components/parameters/McpSessionId'
+        - $ref: '#/components/parameters/McpProtocolVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonRpcMessage'
+      responses:
+        '200':
+          description: JSON-RPC response, or an SSE stream
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonRpcMessage'
+            text/event-stream:
+              schema:
+                type: string
+        '202':
+          description: Accepted with no body (notifications and responses)
+        '400':
+          description: Malformed JSON-RPC message or missing session
+        '404':
+          description: Unknown or expired session
+
+    get:
+      summary: Open the server-to-client event stream
+      description: >-
+        Opens a long-lived SSE stream for server-initiated messages. Held open
+        by design — a client that closes it simply stops receiving
+        notifications.
+      operationId: mcpStream
+      parameters:
+        - $ref: '#/components/parameters/McpSessionId'
+        - $ref: '#/components/parameters/McpProtocolVersion'
+      responses:
+        '200':
+          description: SSE stream of server-initiated JSON-RPC messages
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        '400':
+          description: Missing or invalid session
+        '405':
+          description: Server does not offer a stream for this session
+
+    delete:
+      summary: Terminate an MCP session
+      description: Explicitly ends the session identified by Mcp-Session-Id.
+      operationId: mcpDeleteSession
+      parameters:
+        - $ref: '#/components/parameters/McpSessionId'
+        - $ref: '#/components/parameters/McpProtocolVersion'
+      responses:
+        '204':
+          description: Session terminated
+        '400':
+          description: Missing or invalid session
+        '404':
+          description: Unknown session
+
+components:
+  parameters:
+    McpSessionId:
+      name: Mcp-Session-Id
+      in: header
+      required: false
+      description: >-
+        Session identifier issued by the server during initialize and echoed on
+        subsequent requests.
+      schema:
+        type: string
+    McpProtocolVersion:
+      name: MCP-Protocol-Version
+      in: header
+      required: false
+      description: MCP protocol version negotiated during initialize.
+      schema:
+        type: string
+        example: "2024-11-05"
+
+  schemas:
+    JsonRpcMessage:
+      type: object
+      description: >-
+        A JSON-RPC 2.0 message. Deliberately permissive — MCP carries requests,
+        responses and notifications over the same endpoint, and pinning the
+        shape here would reject valid protocol traffic as the spec evolves.
+      required:
+        - jsonrpc
+      properties:
+        jsonrpc:
+          type: string
+          enum: ["2.0"]
+        id:
+          description: Present on requests and responses, absent on notifications.
+          oneOf:
+            - type: string
+            - type: integer
+        method:
+          type: string
+          description: MCP operation, e.g. initialize, tools/list, tools/call.
+          example: tools/call
+        params:
+          type: object
+          additionalProperties: true
+          description: Operation arguments. For tools/call, the tool name and its arguments.
+        result:
+          type: object
+          additionalProperties: true
+          description: Present on a successful response.
+        error:
+          type: object
+          additionalProperties: true
+          description: Present on a failed response.
+      additionalProperties: true
