@@ -1,0 +1,9 @@
+[package]
+org = "demoexonn"
+name = "order_events_ws"
+version = "0.1.0"
+distribution = "2201.13.4"
+title = "order-events-ws"
+
+[build-options]
+sticky = true
