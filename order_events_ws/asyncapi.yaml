@@ -1,99 +1,104 @@
-asyncapi: 2.0.0
+asyncapi: '2.0.0'
 info:
-  title: OrderStatusEventsAPI
+  title: 'Order Status Events API'
   version: 1.0.0
   description: >-
-    Real-time order status events for C&S Wholesale. The gateway pushes an event to
-    every subscribed client the moment an order changes state, so consumers never poll.
-    Events originate on the `order-status-events` Kafka topic and cover the same orders
-    served by the order status MCP service.
+    Real-time order status events for C&S Wholesale. Every subscribed client is pushed
+    an event the moment an order changes state, so consumers never poll. Events originate
+    on the `order-status-events` Kafka topic and cover the same orders served by the
+    order status MCP service.
 
 servers:
-  # Full endpoint path lives here and the channel stays "/", matching the pattern
-  # WSO2 samples use. Replace with the deployed wss:// URL before creating the proxy.
+  # Component base URLs only. The service path lives under `channels`.
   production:
-    url: wss://b51050bd-6f0e-466b-9a5a-a1de3d2c35d9-prod.e1-us-east-azure.choreoapis.dev/default/order-events-websocket-br/v1.0/orders/events
+    url: wss://b51050bd-6f0e-466b-9a5a-a1de3d2c35d9-prod.e1-us-east-azure.choreoapis.dev/default/order-events-websocket-br/v1.0
     protocol: wss
-    description: Deployed bridge, fronted by the API gateway
+    description: Deployed bridge, production environment
   development:
-    url: wss://b51050bd-6f0e-466b-9a5a-a1de3d2c35d9-dev.e1-us-east-azure.choreoapis.dev/default/order-events-websocket-br/v1.0/orders/events
+    url: wss://b51050bd-6f0e-466b-9a5a-a1de3d2c35d9-dev.e1-us-east-azure.choreoapis.dev/default/order-events-websocket-br/v1.0
     protocol: wss
-    description: Deployed bridge, fronted by the API gateway
+    description: Deployed bridge, development environment
   local:
-    url: ws://localhost:9091/orders/events
+    url: ws://localhost:9091
     protocol: ws
     description: Bridge running locally for development
 
 channels:
-  /:
+  /orders/events:
     description: >-
-      Order status events. Clients receive only; messages sent by a client are ignored.
+      Order status events. Clients receive only; anything a client sends is ignored.
     subscribe:
       summary: Receive order status events as they happen
-      operationId: receiveOrderStatusEvents
+      operationId: ReceiveOrderStatusEvents
       message:
-        name: OrderEventMessage
-        title: Order event
-        contentType: application/json
-        payload:
-          type: object
-          required:
-            - type
-          properties:
-            type:
-              type: string
-              enum:
-                - connected
-                - orderStatusEvent
-                - raw
-              description: >-
-                `connected` is the handshake acknowledgement sent once on subscribe.
-                `orderStatusEvent` carries a parsed event in `event`.
-                `raw` carries an unparseable payload in `raw`, forwarded rather than dropped.
-              example: orderStatusEvent
-            event:
-              type: object
-              description: Present when `type` is `orderStatusEvent`.
-              required:
-                - orderId
-                - status
-              properties:
-                eventId:
-                  type: string
-                  example: evt-1001
-                orderId:
-                  type: string
-                  example: ORD-10003
-                customerId:
-                  type: string
-                  example: CUST-003
-                previousStatus:
-                  type: string
-                  example: PROCESSING
-                status:
-                  type: string
-                  enum:
-                    - PENDING
-                    - PROCESSING
-                    - SHIPPED
-                    - DELIVERED
-                    - CANCELLED
-                  example: SHIPPED
-                carrier:
-                  type: string
-                  example: DHL
-                trackingNumber:
-                  type: string
-                  example: DHL-55512345
-                estimatedDelivery:
-                  type: string
-                  example: "2026-09-18"
-                timestamp:
-                  type: string
-                  example: "2026-09-16T09:15:00Z"
-            raw:
-              type: string
-              description: >-
-                Present when `type` is `connected` (the acknowledgement text) or
-                `raw` (the original payload that failed to parse).
-              example: Subscribed to order-status-events
+        $ref: '#/components/messages/orderEvent'
+
+components:
+  messages:
+    orderEvent:
+      name: orderEvent
+      title: Order event
+      summary: An order status change, or a connection acknowledgement
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - type
+        properties:
+          type:
+            type: string
+            enum:
+              - connected
+              - orderStatusEvent
+              - raw
+            description: >-
+              `connected` is the handshake acknowledgement sent once on subscribe.
+              `orderStatusEvent` carries a parsed event in `event`.
+              `raw` carries an unparseable payload in `raw`, forwarded rather than dropped.
+            example: orderStatusEvent
+          event:
+            type: object
+            description: Present when `type` is `orderStatusEvent`.
+            required:
+              - orderId
+              - status
+            properties:
+              eventId:
+                type: string
+                example: evt-1001
+              orderId:
+                type: string
+                example: ORD-10003
+              customerId:
+                type: string
+                example: CUST-003
+              previousStatus:
+                type: string
+                example: PROCESSING
+              status:
+                type: string
+                enum:
+                  - PENDING
+                  - PROCESSING
+                  - SHIPPED
+                  - DELIVERED
+                  - CANCELLED
+                example: SHIPPED
+              carrier:
+                type: string
+                example: DHL
+              trackingNumber:
+                type: string
+                example: DHL-55512345
+              estimatedDelivery:
+                type: string
+                example: "2026-09-18"
+              timestamp:
+                type: string
+                example: "2026-09-16T09:15:00Z"
+          raw:
+            type: string
+            description: >-
+              Present when `type` is `connected` (the acknowledgement text) or
+              `raw` (the original payload that failed to parse).
+            example: Subscribed to order-status-events

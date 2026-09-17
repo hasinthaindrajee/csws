@@ -11,7 +11,9 @@ endpoints:
     # +required Service section has the user service endpoint details
     service:
       # +optional Base path of the API that gets exposed via the endpoint.
-      basePath: /orders
+      # The gateway forwards to this path verbatim; it does not append the
+      # AsyncAPI channel, so this must be the full path the service answers on.
+      basePath: /orders/events
       # +required Numeric port value that gets exposed via the endpoint
       port: 9091
     # +required Type of traffic that the endpoint is accepting.
