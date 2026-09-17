@@ -23,4 +23,4 @@ endpoints:
       - Public
     # +optional The AsyncAPI definition, relative to the component root.
     # Without this, the endpoint is exposed as a wildcard route.
-    # schemaFilePath: asyncapi.yaml
+    schemaFilePath: asyncapi.yaml
