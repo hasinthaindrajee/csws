@@ -1,10 +1,9 @@
-import ballerina/ai;
 import ballerina/http;
 import ballerinax/ai.openai;
 
 // MCP toolkit that authenticates every call to the order status MCP service
 // using the pre-configured bearer token.
-final ai:McpToolKit orderStatusToolKit = check new (
+final ResilientMcpToolKit orderStatusToolKit = check new (
     serverUrl = mcpServiceUrl,
     permittedTools = ["getOrderDetails", "listOrders"],
     info = {name: "OrderAgentMcpClient", version: "1.0.0"},
