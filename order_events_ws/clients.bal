@@ -32,6 +32,7 @@ isolated function clientCount() returns int {
 // so cannot be copied out of it. Fine at demo scale; revisit if client counts
 // grow enough that serialised broadcasts matter.
 isolated function broadcast(OutboundMessage message) {
+    int delivered = 0;
     int dropped = 0;
     lock {
         string[] dead = [];
@@ -39,6 +40,8 @@ isolated function broadcast(OutboundMessage message) {
             websocket:Error? writeResult = caller->writeMessage(message.cloneReadOnly());
             if writeResult is websocket:Error {
                 dead.push(id);
+            } else {
+                delivered += 1;
             }
         }
         foreach string id in dead {
@@ -47,6 +50,11 @@ isolated function broadcast(OutboundMessage message) {
         dropped = dead.length();
     }
 
+    log:printInfo("Broadcast", messageType = message.'type, delivered = delivered, dropped = dropped);
+    if delivered == 0 {
+        // The usual cause of "I published but saw nothing": nobody was listening.
+        log:printWarn("Broadcast reached no clients - none were connected");
+    }
     if dropped > 0 {
         log:printWarn("Dropped unreachable clients", count = dropped);
     }

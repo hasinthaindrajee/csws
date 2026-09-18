@@ -22,9 +22,15 @@ service on orderEventsListener {
     // and fails in the connector before reaching here - publish with the `value`
     // field, not `content`, or the broker stores nulls.
     remote function onConsumerRecord(string[] messages) {
+        log:printInfo("Kafka batch received", topic = orderEventsTopic, records = messages.length());
+
         foreach string raw in messages {
             OrderStatusEvent|error event = raw.fromJsonStringWithType(OrderStatusEvent);
             if event is OrderStatusEvent {
+                log:printInfo("Order event consumed",
+                        orderId = event.orderId,
+                        status = event.status,
+                        eventId = event?.eventId ?: "-");
                 broadcast({'type: "orderStatusEvent", event: event});
             } else {
                 log:printWarn("Record did not match OrderStatusEvent; forwarding raw", payload = raw);
